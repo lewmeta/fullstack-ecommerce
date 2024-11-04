@@ -5,3 +5,4 @@ CREATE TABLE IF NOT EXISTS "products" (
 	"image" varchar(255),
 	"price" double precision NOT NULL
 );
+ 
