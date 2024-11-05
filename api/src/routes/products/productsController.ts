@@ -4,7 +4,6 @@ import _ from "lodash";
 
 import { db } from "../../db/index";
 import { productsTable } from "../../db/productsSchema";
-import { createProductSchema } from "../../db/productsSchema";
 
 export async function listProducts(req: Request, res: Response) {
   try {
@@ -37,6 +36,7 @@ export async function getProductById(req: Request, res: Response) {
 export async function createProduct(req: Request, res: Response) {
   try {
     // console.log(Object.keys(createProductSchema.shape));
+    console.log(req.userId)
     
     const [product] = await db.insert(productsTable).values(req.cleanBody).returning();
     res.status(201).json(product);
