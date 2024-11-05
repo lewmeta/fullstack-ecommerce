@@ -3,13 +3,13 @@ import bcrypt from 'bcryptjs';
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 
-import { validateData } from "../../middlewares/validationMiddleware";
+import { validateData } from "../../middlewares/validationMiddleware.js";
 import {
   createUserSchema,
   loginSchema,
   usersTable,
-} from "../../db/usersSchema";
-import { db } from "../../db";
+} from "../../db/usersSchema.js";
+import { db } from "../../db/index.js";
 
 const router = Router();
 
@@ -60,18 +60,12 @@ router.post("/login", validateData(loginSchema), async (req, res) => {
     }
 
     // create a jwt token;
-    const token = jwt.sign(
-      { userId: user.id, role: user.role },
-      "your-secret",
-      { expiresIn: "30d" }
-    );
+    const token = generateUserToken(user);
 
     // @ts-ignore
     delete user.password;
     res.status(200).json({ token, user });
 
-    console.log(email, password);
-    res.send(200);
   } catch (error) {
     res.status(500).send("Something went wrong, that's all we know!");
   }
