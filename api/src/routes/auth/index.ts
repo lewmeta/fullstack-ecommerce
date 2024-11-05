@@ -1,5 +1,5 @@
 import { Router } from "express";
-import bcrypt from "bcryptjs";
+import bcrypt from 'bcryptjs';
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 
@@ -13,19 +13,28 @@ import { db } from "../../db";
 
 const router = Router();
 
+const generateUserToken = (user: any) => {
+    return jwt.sign({ userId: user.id, role: user.role }, 'your-secret', {
+      expiresIn: '30d',
+    });
+  };
+
 router.post("/register", validateData(createUserSchema), async (req, res) => {
-  try {
-    const data = req.cleanBody;
-    data.password = await bcrypt.hash(data.password, 10);
-
-    const [user] = await db.insert(usersTable).values(data).returning();
-
-    console.log(data);
-
-    res.status(201).json(user);
-  } catch (error) {
-    res.status(500).send("Something went wrong, thats all we know!");
-  }
+    try {
+        const data = req.cleanBody;
+        data.password = await bcrypt.hash(data.password, 10);
+    
+        const [user] = await db.insert(usersTable).values(data).returning();
+    
+        // @ts-ignore
+        delete user.password;
+        const token = generateUserToken(user);
+    
+        res.status(201).json({ user, token });
+      } catch (e) {
+        console.log(e);
+        res.status(500).send('Something went wrong');
+      }
 });
 
 router.post("/login", validateData(loginSchema), async (req, res) => {
@@ -58,7 +67,7 @@ router.post("/login", validateData(loginSchema), async (req, res) => {
     );
 
     // @ts-ignore
-    delete user.password
+    delete user.password;
     res.status(200).json({ token, user });
 
     console.log(email, password);
